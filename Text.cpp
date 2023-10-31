@@ -8,17 +8,17 @@ std::vector<std::wstring*> Text::toLines(std::wstring &str) {
   std::vector<std::wstring*> lines;
   int sz = int(str.size()), n = 0;
   while (sz > 0) {
-    std::wstring s = std::wstring(str.begin() + 60 * n,
-                                  str.begin() + 60 * n + std::min(60, sz))
+    std::wstring s = std::wstring(str.begin() + 80 * n,
+                                  str.begin() + 80 * n + std::min(80, sz - 1))
                                           + wchar_t('\n');
     lines.push_back(new std::wstring(s));
     ++n;
-    sz -= 60;
+    sz -= 80;
   }
   return lines;
 }
 
-void Text::replace(std::wstring& str, std::wstring& from, std::wstring& to) {
+std::vector<std::wstring*> Text::replace(std::wstring& str, std::wstring& from, std::wstring& to) {
   int start = 0, idx = 0;
   for (int i = 0; i < str.size(); ++i) {
     if (str[i] == from[idx]) {
@@ -34,6 +34,9 @@ void Text::replace(std::wstring& str, std::wstring& from, std::wstring& to) {
       idx = 0;
     }
   }
+
+  std::vector<std::wstring*> strs = toLines(str);
+  return strs;
 }
 
 void Text::removeZeros(std::wstring& str) {
@@ -93,28 +96,5 @@ void Text::onlyGrades(std::wstring &str) {
       }
       len = 0;
     }
-  }
-}
-
-void Text::replaceStars(std::wstring &str) {
-  int n = 0, start = 0;
-
-  for (int i = 0; i < str.size();) {
-    if (str[i] == '*') {
-      if (n == 0) start = i;
-      ++n;
-    } else {
-      if (n < 2) {
-        n = 0;
-        ++i;
-        continue;
-      }
-      i -= n;
-      str.erase(start, n);
-      str.insert(i, getNPlus(n / 2));
-      i += n / 2;
-      n = 0;
-    }
-    ++i;
   }
 }

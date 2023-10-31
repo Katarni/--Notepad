@@ -9,7 +9,7 @@
 class Text {
  public:
   static std::vector<std::wstring*> toLines(std::wstring& str);
-  static void replace(std::wstring& str, std::wstring& from, std::wstring& to);
+  static std::vector<std::wstring*> replace(std::wstring& str, std::wstring& from, std::wstring& to);
   static void removeZeros(std::wstring& str);
   static void removeBrackets(std::wstring& str);
   static void onlyGrades(std::wstring& str);

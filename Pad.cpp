@@ -390,8 +390,15 @@ void Pad::replaceSubSeq() {
 
   std::wstring from = text[0].toStdWString(), to = text[1].toStdWString();
 
-  for (int j = n; j < m; ++j) {
-    Text::replace(*lines_[j], from, to);
+  for (int j = n; j < m;) {
+    std::vector<std::wstring*> strs = Text::replace(*lines_[j], from, to);
+    delete lines_[j];
+    lines_.erase(lines_.begin() + j);
+    m += int(strs.size()) - 1;
+    for (int i = j; i < strs.size() + j; ++i) {
+      lines_.insert(lines_.begin() + i, strs[i - j]);
+    }
+    j += int(strs.size());
   }
 
   showText();
@@ -486,8 +493,16 @@ void Pad::replaceStars() {
     m = std::max(0, std::min(m, (int)lines_.size()));
   }
 
-  for (int i = n; i < m; ++i) {
-    Text::replaceStars(*lines_[i]);
+  std::wstring star = L"**", plus = L"+";
+  for (int i = n; i < m;) {
+    std::vector<std::wstring*> strs = Text::replace(*lines_[i], star, plus);
+    delete lines_[i];
+    lines_.erase(lines_.begin() + i);
+    m += int(strs.size()) - 1;
+    for (int j = 0; j < strs.size(); ++j) {
+      lines_.insert(lines_.begin() + n + i + j, strs[j]);
+    }
+    i += int(strs.size());
   }
 
   showText();
