@@ -28,7 +28,7 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   description_header->setFont(desc_font);
   description_header->setStyleSheet("QLabel { padding: 7px;"
                                     "padding-left: 0; }");
-  description_header->setText(" - You don't need it");
+  description_header->setText("-You don't need it");
 
   text_win_ = new QTextBrowser(window_);
   text_win_->resize(int(win_width_ * 0.75), int(win_height_ * 0.65));
