@@ -7,17 +7,28 @@
 Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   window_ = new QMainWindow();
   window_->setFixedSize(win_width_, win_height_);
-  window_->setWindowTitle("--Notepad - you don't need it");
+  window_->setWindowTitle("--Notepad");
   window_->setStyleSheet("QWidget { background-color: #eee; }");
 
   header_holder = new QLabel(window_);
-  header_holder->setFixedSize(int(win_width_ * 0.35), int(win_height_ * 0.05) + 10);
+  header_holder->setFixedSize(int(win_width_ * 0.18), int(win_height_ * 0.05) + 10);
   header_holder->move(int(win_width_ * 0.4) + 20, 0);
   QFont header_font = header_holder->font();
   header_font.setPixelSize(28);
   header_font.setBold(true);
   header_holder->setFont(header_font);
   header_holder->setText("--Notepad");
+
+  description_header = new QLabel(window_);
+  description_header->setFixedSize(int(win_width_ * 0.3), int(win_height_ * 0.05) + 10);
+  description_header->move(int(win_width_ * 0.58) + 13, 0);
+  description_header->setAlignment(Qt::AlignBottom);
+  QFont desc_font = description_header->font();
+  desc_font.setPixelSize(14);
+  description_header->setFont(desc_font);
+  description_header->setStyleSheet("QLabel { padding: 7px;"
+                                    "padding-left: 0; }");
+  description_header->setText(" - You don't need it");
 
   text_win_ = new QTextBrowser(window_);
   text_win_->resize(int(win_width_ * 0.75), int(win_height_ * 0.65));
