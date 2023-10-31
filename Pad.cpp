@@ -18,6 +18,7 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   header_font.setBold(true);
   header_holder->setFont(header_font);
   header_holder->setText("--Notepad");
+  header_holder->setStyleSheet("QLabel { color: #000; }");
 
   description_header = new QLabel(window_);
   description_header->setFixedSize(int(win_width_ * 0.3), int(win_height_ * 0.05) + 10);
@@ -27,7 +28,8 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   desc_font.setPixelSize(14);
   description_header->setFont(desc_font);
   description_header->setStyleSheet("QLabel { padding: 7px;"
-                                    "padding-left: 0; }");
+                                    "padding-left: 0;"
+                                    "color: #000; }");
   description_header->setText("-You don't need it");
 
   text_win_ = new QTextBrowser(window_);
@@ -86,8 +88,7 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
                                   "margin: 10px;"
                                   "padding: 5px;"
                                   "color: #000; }");
-  text_ent_->setPlaceholderText("Сначала вводятся позиции для вставки или замены строк и подстрок,\n"
-                                "потом, начиная со второй строки, вводятся сами строки");
+  text_ent_->setPlaceholderText("Строки");
 
   setButtons();
 }
@@ -493,25 +494,29 @@ void Pad::replaceStars() {
 }
 
 void Pad::removeBrackets() {
-  int n = 0, m = 0;
+  int n = 0, m = int(lines_.size());
   QString nums = num_ent_->text();
   num_ent_->clear();
   bool space = false;
-  for (char c : nums.toStdString()) {
-    if (c == ' ') {
-      space = true;
-      continue;
-    }
 
-    if (space) {
-      m = m * 10 + c - '0';
-    } else {
-      n = n * 10 + c - '0';
+  if (!nums.isEmpty()) {
+    m = 0;
+    for (char c : nums.toStdString()) {
+      if (c == ' ') {
+        space = true;
+        continue;
+      }
+
+      if (space) {
+        m = m * 10 + c - '0';
+      } else {
+        n = n * 10 + c - '0';
+      }
     }
+    --n;
+    if (n < 0 || n >= lines_.size()) return;
+    m = std::max(0, std::min(m, (int)lines_.size()));
   }
-  --n;
-  if (n < 0 || n >= lines_.size()) return;
-  m = std::max(0, std::min(m, (int)lines_.size()));
 
   for (int i = n; i < m; ++i) {
     Text::removeBrackets(*lines_[i]);

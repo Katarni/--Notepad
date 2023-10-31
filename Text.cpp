@@ -8,12 +8,12 @@ std::vector<std::wstring*> Text::toLines(std::wstring &str) {
   std::vector<std::wstring*> lines;
   int sz = int(str.size()), n = 0;
   while (sz > 0) {
-    std::wstring s = std::wstring(str.begin() + 120 * n,
-                                  str.begin() + 120 * n + std::min(120, sz))
+    std::wstring s = std::wstring(str.begin() + 60 * n,
+                                  str.begin() + 60 * n + std::min(60, sz))
                                           + wchar_t('\n');
     lines.push_back(new std::wstring(s));
     ++n;
-    sz -= 120;
+    sz -= 60;
   }
   return lines;
 }
