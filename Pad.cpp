@@ -67,10 +67,21 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
                                   "border-radius: 10px;"
                                   "margin: 10px; }");
 
+  num_ent_ = new QLineEdit(window_);
+  num_ent_->resize(int(win_width_ * 0.25), int(win_height_ * 0.15));
+  num_ent_->move(0, int(win_height_ * 0.85));
+  num_ent_->setStyleSheet("QLineEdit { background-color: #fff;"
+                           "border-radius: 10px;"
+                           "margin: 10px;"
+                           "padding: 5px;"
+                           "color: #000; }");
+  num_ent_->setPlaceholderText("Индекс(ы) строк");
+  num_ent_->setAlignment(Qt::AlignTop);
+
   text_ent_ = new QTextEdit(window_);
-  text_ent_->resize(int(win_width_), int(win_height_ * 0.15));
-  text_ent_->move(0, int(win_height_ * 0.85));
-  text_ent_->setStyleSheet("QWidget { background-color: #fff;"
+  text_ent_->resize(int(win_width_ * 0.75), int(win_height_ * 0.15));
+  text_ent_->move(int(win_width_ * 0.25), int(win_height_ * 0.85));
+  text_ent_->setStyleSheet("QTextEdit { background-color: #fff;"
                                   "border-radius: 10px;"
                                   "margin: 10px;"
                                   "padding: 5px;"
@@ -187,23 +198,23 @@ void Pad::showText() {
 }
 
 void Pad::insertAfterLine() {
+  int n = 0;
+  QString num = num_ent_->text();
+  num_ent_->clear();
+  for (char c : num.toStdString()) {
+    if (c == ' ') break;
+
+    n = n * 10 + c - '0';
+  }
+  n = std::max(0, std::min(n, (int)lines_.size()));
+
   QString data = text_ent_->toPlainText();
   text_ent_->clear();
   if (data.isEmpty()) return;
   QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
 
-  std::wstring str;
-  int n = int(lines_.size()), i = 0;
-  if (text.size() > 1) {
-    ++i;
-    for (char c : text[0].toStdString()) {
-      n = n * 10 + c - '0';
-    }
-    n = std::max(0, std::min(n, int(lines_.size())));
-  }
-  str = text[i].toStdWString();
-  std::vector<std::wstring*> strs = Text::toLines(str);
-
+  std::wstring line = text[0].toStdWString();
+  std::vector<std::wstring*> strs = Text::toLines(line);
   for (int j = 0; j < strs.size(); ++j) {
     lines_.insert(lines_.begin() + n + j, strs[j]);
   }
@@ -212,16 +223,11 @@ void Pad::insertAfterLine() {
 }
 
 void Pad::multiInsertAfterLine() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-  if (data.isEmpty()) return;
-  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
-  if (text.size() < 2) return;
-
-  int n = 0;
-  int m = 0;
+  int n = 0, m = 0;
+  QString nums = num_ent_->text();
+  num_ent_->clear();
   bool space = false;
-  for (char c : text[0].toStdString()) {
+  for (char c : nums.toStdString()) {
     if (c == ' ') {
       space = true;
       continue;
@@ -233,10 +239,15 @@ void Pad::multiInsertAfterLine() {
       n = n * 10 + c - '0';
     }
   }
-  n = std::max(0, std::min(n, int(lines_.size())));
+  n = std::max(0, std::min(n, (int)lines_.size()));
 
-  for (int i = 0; i < m; ++i) {
-    std::wstring str = text[i + 1].toStdWString();
+  QString data = text_ent_->toPlainText();
+  text_ent_->clear();
+  if (data.isEmpty()) return;
+  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+
+  for (int i = 0; i < std::min((int)text.size(), m); ++i) {
+    std::wstring str = text[i].toStdWString();
     std::vector<std::wstring*> strs = Text::toLines(str);
 
     int j;
@@ -251,14 +262,17 @@ void Pad::multiInsertAfterLine() {
 }
 
 void Pad::eraseLine() {
-  QString data = text_ent_->toPlainText();
+  int n = 0;
+  QString num = num_ent_->text();
+  num_ent_->clear();
   text_ent_->clear();
-  if (data.isEmpty()) return;
-  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+  for (char c : num.toStdString()) {
+    if (c == ' ') break;
 
-  int n = text.first().toStdString()[0] - '0';
-  n = n == 0 ? 0 : n - 1;
-  if (n > lines_.size()) return;
+    n = n * 10 + c - '0';
+  }
+  --n;
+  if (n < 0 || n >= lines_.size()) return;
 
   delete lines_[n];
   lines_.erase(lines_.begin() + n);
@@ -267,16 +281,11 @@ void Pad::eraseLine() {
 }
 
 void Pad::replaceSymbol() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-  if (data.isEmpty()) return;
-  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
-  if (text.size() < 2) return;
-
-  int n = 0;
-  int m = 0;
+  int n = 0, m = 0;
+  QString nums = num_ent_->text();
+  num_ent_->clear();
   bool space = false;
-  for (char c : text[0].toStdString()) {
+  for (char c : nums.toStdString()) {
     if (c == ' ') {
       space = true;
       continue;
@@ -288,11 +297,15 @@ void Pad::replaceSymbol() {
       n = n * 10 + c - '0';
     }
   }
-  n = n == 0 ? 0 : n - 1;
-  m = m == 0 ? 0 : m - 1;
-  if (n > lines_.size() || m > lines_[n]->size()) return;
+  --n;
+  --m;
+  if (n < 0 || n >= lines_.size()) return;
+  if (m < 0 || m >= lines_[n]->size()) return;
 
-  wchar_t rep = text[1].toStdWString()[0];
+  QString data = text_ent_->toPlainText();
+  text_ent_->clear();
+  if (data.isEmpty()) return;
+  wchar_t rep =data.toStdWString()[0];
   int i = 0;
   for (wchar_t& c : *lines_[n]) {
     if (i == m) {
@@ -306,16 +319,11 @@ void Pad::replaceSymbol() {
 }
 
 void Pad::insertSubSeq() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-  if (data.isEmpty()) return;
-  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
-  if (text.size() < 2) return;
-
-  int n = 0;
-  int m = 0;
+  int n = 0, m = 0;
+  QString nums = num_ent_->text();
+  num_ent_->clear();
   bool space = false;
-  for (char c : text[0].toStdString()) {
+  for (char c : nums.toStdString()) {
     if (c == ' ') {
       space = true;
       continue;
@@ -327,12 +335,16 @@ void Pad::insertSubSeq() {
       n = n * 10 + c - '0';
     }
   }
-  n = n <= 0 ? 0 : n - 1;
-  m = m <= 0 ? 0 : m - 1;
-  m = std::min(int(lines_.size()), m);
-  if (n > lines_.size()) return;
+  --n;
+  if (n < 0 || n >= lines_.size()) return;
+  if (m < 0 || m > lines_[n]->size()) return;
 
-  std::wstring str = text[1].toStdWString();
+  QString data = text_ent_->toPlainText();
+  text_ent_->clear();
+  if (data.isEmpty()) return;
+  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+
+  std::wstring str = text[0].toStdWString();
   std::wstring target = *lines_[n];
   lines_.erase(lines_.begin() + n);
   const wchar_t* paste = str.c_str();
@@ -346,17 +358,14 @@ void Pad::insertSubSeq() {
 }
 
 void Pad::replaceSubSeq() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-  if (data.isEmpty()) return;
-  QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+  int n = 0, m = int(lines_.size());
+  QString nums = num_ent_->text();
+  num_ent_->clear();
+  bool space = false;
 
-  int i = 0, n = 0, m = int(lines_.size());
-  if (text.size() == 2) {
-    ++i;
+  if (!nums.isEmpty()) {
     m = 0;
-    bool space = false;
-    for (char c : text[0].toStdString()) {
+    for (char c : nums.toStdString()) {
       if (c == ' ') {
         space = true;
         continue;
@@ -368,27 +377,17 @@ void Pad::replaceSubSeq() {
         n = n * 10 + c - '0';
       }
     }
-    n = n <= 0 ? 0 : n - 1;
-    m = m <= 0 ? 0 : m - 1;
-    if (n > lines_.size()) return;
-    m = std::min(int(lines_.size()), m);
+    --n;
+    if (n < 0 || n >= lines_.size()) return;
+    m = std::max(0, std::min(m, (int)lines_.size()));
   }
 
-  std::wstring sequences = text[i].toStdWString();
-  std::wstring from, to;
-  bool space = false;
-  for (wchar_t c : sequences) {
-    if (c == ' ') {
-      space = true;
-      continue;
-    }
+  QString data = text_ent_->toPlainText();
+  text_ent_->clear();
+  if (data.isEmpty()) return;
+  QStringList text = data.split(QRegularExpression("[ ]"), Qt::SkipEmptyParts);
 
-    if (space) {
-      to.push_back(c);
-      continue;
-    }
-    from.push_back(c);
-  }
+  std::wstring from = text[0].toStdWString(), to = text[1].toStdWString();
 
   for (int j = n; j < m; ++j) {
     Text::replace(*lines_[j], from, to);
@@ -398,15 +397,14 @@ void Pad::replaceSubSeq() {
 }
 
 void Pad::removeZeros() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-
   int n = 0, m = int(lines_.size());
-  if (!data.isEmpty()) {
-    QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+  QString nums = num_ent_->text();
+  num_ent_->clear();
+  bool space = false;
+
+  if (!nums.isEmpty()) {
     m = 0;
-    bool space = false;
-    for (char c : text[0].toStdString()) {
+    for (char c : nums.toStdString()) {
       if (c == ' ') {
         space = true;
         continue;
@@ -418,10 +416,9 @@ void Pad::removeZeros() {
         n = n * 10 + c - '0';
       }
     }
-    n = n <= 0 ? 0 : n - 1;
-    m = m <= 0 ? 0 : m - 1;
-    if (n > lines_.size()) return;
-    m = std::min(int(lines_.size()), m);
+    --n;
+    if (n < 0 || n >= lines_.size()) return;
+    m = std::max(0, std::min(m, (int)lines_.size()));
   }
 
   for (int i = n; i < m; ++i) {
@@ -432,15 +429,14 @@ void Pad::removeZeros() {
 }
 
 void Pad::onlyGradesNums() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-
   int n = 0, m = int(lines_.size());
-  if (!data.isEmpty()) {
-    QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+  QString nums = num_ent_->text();
+  num_ent_->clear();
+  bool space = false;
+
+  if (!nums.isEmpty()) {
     m = 0;
-    bool space = false;
-    for (char c : text[0].toStdString()) {
+    for (char c : nums.toStdString()) {
       if (c == ' ') {
         space = true;
         continue;
@@ -452,10 +448,9 @@ void Pad::onlyGradesNums() {
         n = n * 10 + c - '0';
       }
     }
-    n = n <= 0 ? 0 : n - 1;
-    m = m <= 0 ? 0 : m - 1;
-    if (n > lines_.size()) return;
-    m = std::min(int(lines_.size()), m);
+    --n;
+    if (n < 0 || n >= lines_.size()) return;
+    m = std::max(0, std::min(m, (int)lines_.size()));
   }
 
   for (int i = n; i < m; ++i) {
@@ -466,15 +461,14 @@ void Pad::onlyGradesNums() {
 }
 
 void Pad::replaceStars() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-
   int n = 0, m = int(lines_.size());
-  if (!data.isEmpty()) {
-    QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
+  QString nums = num_ent_->text();
+  num_ent_->clear();
+  bool space = false;
+
+  if (!nums.isEmpty()) {
     m = 0;
-    bool space = false;
-    for (char c : text[0].toStdString()) {
+    for (char c : nums.toStdString()) {
       if (c == ' ') {
         space = true;
         continue;
@@ -486,10 +480,9 @@ void Pad::replaceStars() {
         n = n * 10 + c - '0';
       }
     }
-    n = n <= 0 ? 0 : n - 1;
-    m = m <= 0 ? 0 : m - 1;
-    if (n > lines_.size()) return;
-    m = std::min(int(lines_.size()), m);
+    --n;
+    if (n < 0 || n >= lines_.size()) return;
+    m = std::max(0, std::min(m, (int)lines_.size()));
   }
 
   for (int i = n; i < m; ++i) {
@@ -500,31 +493,25 @@ void Pad::replaceStars() {
 }
 
 void Pad::removeBrackets() {
-  QString data = text_ent_->toPlainText();
-  text_ent_->clear();
-
-  int n = 0, m = int(lines_.size());
-  if (!data.isEmpty()) {
-    QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
-    m = 0;
-    bool space = false;
-    for (char c : text[0].toStdString()) {
-      if (c == ' ') {
-        space = true;
-        continue;
-      }
-
-      if (space) {
-        m = m * 10 + c - '0';
-      } else {
-        n = n * 10 + c - '0';
-      }
+  int n = 0, m = 0;
+  QString nums = num_ent_->text();
+  num_ent_->clear();
+  bool space = false;
+  for (char c : nums.toStdString()) {
+    if (c == ' ') {
+      space = true;
+      continue;
     }
-    n = n <= 0 ? 0 : n - 1;
-    m = m <= 0 ? 0 : m - 1;
-    if (n > lines_.size()) return;
-    m = std::min(int(lines_.size()), m);
+
+    if (space) {
+      m = m * 10 + c - '0';
+    } else {
+      n = n * 10 + c - '0';
+    }
   }
+  --n;
+  if (n < 0 || n >= lines_.size()) return;
+  m = std::max(0, std::min(m, (int)lines_.size()));
 
   for (int i = n; i < m; ++i) {
     Text::removeBrackets(*lines_[i]);

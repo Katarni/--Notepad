@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QLabel>
+#include <QLineEdit>
 #include <QTextEdit>
 #include <QRegularExpression>
 #include <QString>
