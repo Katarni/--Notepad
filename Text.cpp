@@ -28,7 +28,7 @@ void Text::replace(std::wstring& str, std::wstring& from, std::wstring& to) {
       if (idx == from.size()) {
         str.erase(start, from.size());
         str.insert(start, to);
-        i = start + int(to.size());
+        i = start + int(to.size()) - 2;
       }
     } else {
       idx = 0;

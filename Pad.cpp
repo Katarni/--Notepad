@@ -7,8 +7,17 @@
 Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   window_ = new QMainWindow();
   window_->setFixedSize(win_width_, win_height_);
-  window_->setWindowTitle("--Notepad");
+  window_->setWindowTitle("--Notepad - you don't need it");
   window_->setStyleSheet("QWidget { background-color: #eee; }");
+
+  header_holder = new QLabel(window_);
+  header_holder->setFixedSize(int(win_width_ * 0.35), int(win_height_ * 0.05) + 10);
+  header_holder->move(int(win_width_ * 0.4) + 20, 0);
+  QFont header_font = header_holder->font();
+  header_font.setPixelSize(28);
+  header_font.setBold(true);
+  header_holder->setFont(header_font);
+  header_holder->setText("--Notepad");
 
   text_win_ = new QTextBrowser(window_);
   text_win_->resize(int(win_width_ * 0.75), int(win_height_ * 0.65));

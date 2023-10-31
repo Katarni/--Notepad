@@ -35,6 +35,7 @@ class Pad : public QMainWindow {
   QWidget* buttons_lbl_hor_;
   QTextBrowser* text_win_;
   QTextEdit* text_ent_;
+  QLabel* header_holder;
 
   QPushButton* save_btn_;
   QPushButton* load_btn_;
