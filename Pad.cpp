@@ -172,12 +172,16 @@ void Pad::insertAfterLine() {
   if (data.isEmpty()) return;
   QStringList text = data.split(QRegularExpression("[\n]"), Qt::SkipEmptyParts);
 
+  std::wstring str;
   int n = int(lines_.size()), i = 0;
   if (text.size() > 1) {
     ++i;
-    n = std::min(int(text.first().toStdString()[0] - '0'), int(lines_.size()));
+    for (char c : text[0].toStdString()) {
+      n = n * 10 + c - '0';
+    }
+    n = std::max(0, std::min(n, int(lines_.size())));
   }
-  std::wstring str = text[i].toStdWString();
+  str = text[i].toStdWString();
   std::vector<std::wstring*> strs = Text::toLines(str);
 
   for (int j = 0; j < strs.size(); ++j) {
@@ -209,7 +213,7 @@ void Pad::multiInsertAfterLine() {
       n = n * 10 + c - '0';
     }
   }
-  n = std::min(n, int(lines_.size()));
+  n = std::max(0, std::min(n, int(lines_.size())));
 
   for (int i = 0; i < m; ++i) {
     std::wstring str = text[i + 1].toStdWString();
@@ -303,8 +307,8 @@ void Pad::insertSubSeq() {
       n = n * 10 + c - '0';
     }
   }
-  n = n == 0 ? 0 : n - 1;
-  m = m == 0 ? 0 : m - 1;
+  n = n <= 0 ? 0 : n - 1;
+  m = m <= 0 ? 0 : m - 1;
   m = std::min(int(lines_.size()), m);
   if (n > lines_.size()) return;
 
@@ -313,7 +317,6 @@ void Pad::insertSubSeq() {
   lines_.erase(lines_.begin() + n);
   const wchar_t* paste = str.c_str();
   target.insert(m, paste);
-
   std::vector<std::wstring*> strs = Text::toLines(target);
   for (int j = 0; j < strs.size(); ++j) {
     lines_.insert(lines_.begin() + n + j, strs[j]);
@@ -345,7 +348,8 @@ void Pad::replaceSubSeq() {
         n = n * 10 + c - '0';
       }
     }
-    n = n == 0 ? 0 : n - 1;
+    n = n <= 0 ? 0 : n - 1;
+    m = m <= 0 ? 0 : m - 1;
     if (n > lines_.size()) return;
     m = std::min(int(lines_.size()), m);
   }
@@ -394,7 +398,8 @@ void Pad::removeZeros() {
         n = n * 10 + c - '0';
       }
     }
-    n = n == 0 ? 0 : n - 1;
+    n = n <= 0 ? 0 : n - 1;
+    m = m <= 0 ? 0 : m - 1;
     if (n > lines_.size()) return;
     m = std::min(int(lines_.size()), m);
   }
@@ -427,7 +432,8 @@ void Pad::onlyGradesNums() {
         n = n * 10 + c - '0';
       }
     }
-    n = n == 0 ? 0 : n - 1;
+    n = n <= 0 ? 0 : n - 1;
+    m = m <= 0 ? 0 : m - 1;
     if (n > lines_.size()) return;
     m = std::min(int(lines_.size()), m);
   }
@@ -460,7 +466,8 @@ void Pad::replaceStars() {
         n = n * 10 + c - '0';
       }
     }
-    n = n == 0 ? 0 : n - 1;
+    n = n <= 0 ? 0 : n - 1;
+    m = m <= 0 ? 0 : m - 1;
     if (n > lines_.size()) return;
     m = std::min(int(lines_.size()), m);
   }
@@ -493,7 +500,8 @@ void Pad::removeBrackets() {
         n = n * 10 + c - '0';
       }
     }
-    n = n == 0 ? 0 : n - 1;
+    n = n <= 0 ? 0 : n - 1;
+    m = m <= 0 ? 0 : m - 1;
     if (n > lines_.size()) return;
     m = std::min(int(lines_.size()), m);
   }

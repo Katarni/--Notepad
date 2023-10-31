@@ -43,6 +43,5 @@ class Pad : public QMainWindow {
   std::vector<QPushButton*> buttons_;
 
   void setButtons();
-
   void showText();
 };
