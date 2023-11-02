@@ -6,14 +6,14 @@
 
 std::vector<std::wstring*> Text::toLines(std::wstring &str) {
   std::vector<std::wstring*> lines;
-  int sz = int(str.size()), n = 0;
+  int sz = int(str.size()) - (str[str.size() - 1] == '\n'), n = 0;
   while (sz > 0) {
-    std::wstring s = std::wstring(str.begin() + 80 * n,
-                                  str.begin() + 80 * n + std::min(80, sz - 1))
+    std::wstring s = std::wstring(str.begin() + 70 * n,
+                                  str.begin() + 70 * n + std::min(70, sz))
                                           + wchar_t('\n');
     lines.push_back(new std::wstring(s));
     ++n;
-    sz -= 80;
+    sz -= 70;
   }
   return lines;
 }

@@ -53,7 +53,6 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
                            "background: #fff; }");
   text_win_->setAlignment(Qt::AlignTop);
 
-
   buttons_lbl_ver_ = new QWidget(window_);
   buttons_lbl_ver_->resize(int(win_width_ * 0.25), int(win_height_ * 0.65));
   buttons_lbl_ver_->move(int(win_width_ * 0.75), int(win_height_ * 0.05) + 10);
@@ -84,10 +83,20 @@ Pad::Pad(int width, int height) : win_width_(width), win_height_(height) {
   text_ent_->resize(int(win_width_ * 0.75), int(win_height_ * 0.15));
   text_ent_->move(int(win_width_ * 0.25), int(win_height_ * 0.85));
   text_ent_->setStyleSheet("QTextEdit { background-color: #fff;"
-                                  "border-radius: 10px;"
-                                  "margin: 10px;"
-                                  "padding: 5px;"
-                                  "color: #000; }");
+                           "border-radius: 10px;"
+                           "margin: 10px;"
+                           "padding: 5px;"
+                           "color: #000; }"
+                           "QTextEdit QScrollBar::handle { background-color: #eddfc6;"
+                           "border-radius: 10px; }"
+                           "QTextEdit QScrollBar { border-radius: 10px;"
+                           "background: #fff;"
+                           "border: 2px solid #eee; }"
+                           "QScrollBar:left-arrow, QScrollBar::right-arrow {"
+                           "border: 2px solid #eee;"
+                           "width: 3px;"
+                           "height: 3px;"
+                           "background: #fff; }");
   text_ent_->setPlaceholderText("Строки");
 
   setButtons();
@@ -531,6 +540,7 @@ void Pad::removeBrackets() {
     --n;
     if (n < 0 || n >= lines_.size()) return;
     m = std::max(0, std::min(m, (int)lines_.size()));
+    if (m == 0) m = n + 1;
   }
 
   for (int i = n; i < m; ++i) {
